@@ -3,11 +3,22 @@ import userModel from "../models/usermodels.js";
 
 const clerkwebHooks = async (req, res) => {
     try {
+        // Check for the required headers
+        const { "svix-id": svixId, "svix-timestamp": svixTimestamp, "svix-signature": svixSignature } = req.headers;
+
+        if (!svixId || !svixTimestamp || !svixSignature) {
+            return res.status(400).json({
+                success: false,
+                message: "Missing required webhook headers: svix-id, svix-timestamp, or svix-signature"
+            });
+        }
+
+        // Verify the webhook signature
         const whook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
         await whook.verify(JSON.stringify(req.body), {
-            "svix-id": req.headers["svix-id"],
-            "svix-timestamp": req.headers["svix-timestamp"],
-            "svix-signature": req.headers["svix-signature"]
+            "svix-id": svixId,
+            "svix-timestamp": svixTimestamp,
+            "svix-signature": svixSignature
         });
 
         const { data, type } = req.body;
