@@ -1,9 +1,8 @@
 import { Webhook } from "svix";
-import userModel from "../models/usermodels.js";
+import userModel from "../models/usermodels.js"; // Import your user model
 
 const clerkwebHooks = async (req, res) => {
     try {
-        // Check for the required headers
         const { "svix-id": svixId, "svix-timestamp": svixTimestamp, "svix-signature": svixSignature } = req.headers;
 
         if (!svixId || !svixTimestamp || !svixSignature) {
@@ -13,7 +12,7 @@ const clerkwebHooks = async (req, res) => {
             });
         }
 
-        // Verify the webhook signature
+        // Create a new Webhook object to verify the request
         const whook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
         await whook.verify(JSON.stringify(req.body), {
             "svix-id": svixId,
@@ -31,7 +30,7 @@ const clerkwebHooks = async (req, res) => {
             case "user.created": {
                 const userData = {
                     clerkId: data.id,
-                    email: data.email_addresses[0]?.email_address || null, // Handle possible undefined
+                    email: data.email_addresses[0]?.email_address || null,
                     firstName: data.first_name,
                     lastName: data.last_name,
                     photo: data.image_url
@@ -41,7 +40,7 @@ const clerkwebHooks = async (req, res) => {
             }
             case "user.updated": {
                 const userData = {
-                    email: data.email_addresses[0]?.email_address || null, // Handle possible undefined
+                    email: data.email_addresses[0]?.email_address || null,
                     firstName: data.first_name,
                     lastName: data.last_name,
                     photo: data.image_url
